@@ -1,33 +1,68 @@
+'use client'
+
+import { useCallback } from 'react'
+import { SearchBar } from '@/components/SearchBar'
+import { useSearchViewModel } from '@/features/search/hooks/useSearchViewModel'
+import { SearchResults } from '@/features/search/components/SearchResults'
+
 export default function Home() {
+  const {
+    results,
+    loading,
+    error,
+    query,
+    searchType,
+    search,
+    clearResults,
+    hasResults,
+  } = useSearchViewModel()
+
+  const handleSearch = useCallback(async (searchQuery: string, type: 'people' | 'organizations') => {
+    const searchTypeMap = {
+      people: 'person' as const,
+      organizations: 'organization' as const,
+    }
+    
+    await search(searchQuery, searchTypeMap[type])
+  }, [search])
+
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-16">
+    <main className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Welcome to Torre Assessment
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
+            Find Your Next Opportunity
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            A minimal Next.js 15 project with TypeScript and Tailwind CSS
+          <p className="text-lg sm:text-xl text-gray-600 mb-8 sm:mb-12 px-4 sm:px-0">
+            Search for people and organizations to connect with your professional network
           </p>
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              🚀 Project Setup Complete
-            </h2>
-            <div className="grid md:grid-cols-3 gap-4 text-left">
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-green-800">Next.js 15</h3>
-                <p className="text-green-600">Latest version with App Router</p>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-blue-800">TypeScript</h3>
-                <p className="text-blue-600">Full type safety</p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-purple-800">Tailwind CSS</h3>
-                <p className="text-purple-600">Utility-first styling</p>
-              </div>
+          
+          {/* Search Bar */}
+          <SearchBar onSearch={handleSearch} loading={loading} />
+          
+          {/* Error Display */}
+          {error && (
+            <div className="mt-6 sm:mt-8 bg-red-50 border border-red-200 rounded-lg p-4 mx-4 sm:mx-0">
+              <h3 className="text-red-800 font-semibold text-sm sm:text-base">Search Error</h3>
+              <p className="text-red-600 text-sm sm:text-base">{error}</p>
+              <button 
+                onClick={clearResults}
+                className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm sm:text-base"
+              >
+                Clear
+              </button>
             </div>
-          </div>
+          )}
+          
+                  {/* Search Results */}
+                  <SearchResults
+                    results={results}
+                    loading={loading}
+                    query={query}
+                    searchType={searchType === 'person' ? 'people' : 'organizations'}
+                  />
         </div>
       </div>
     </main>

@@ -1,110 +1,93 @@
-// Atomic Component - Individual user card
 'use client'
 
-import { useState } from 'react'
 import { User } from '@/lib/types/user'
 
 interface UserCardProps {
   user: User
-  onUpdate: (id: string, data: { name?: string; email?: string }) => Promise<void>
-  onDelete: (id: string) => Promise<void>
-  loading: boolean
+  onClick?: (user: User) => void
 }
 
-export const UserCard = ({ user, onUpdate, onDelete, loading }: UserCardProps) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editData, setEditData] = useState({
-    name: user.name,
-    email: user.email
-  })
-
-  const handleSave = async () => {
-    try {
-      await onUpdate(user.id, editData)
-      setIsEditing(false)
-    } catch (error) {
-      console.error('Failed to update user:', error)
-    }
-  }
-
-  const handleCancel = () => {
-    setEditData({ name: user.name, email: user.email })
-    setIsEditing(false)
+export const UserCard = ({ user, onClick }: UserCardProps) => {
+  const handleClick = () => {
+    onClick?.(user)
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <div className="flex items-center space-x-4 mb-4">
-        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-          {user.name.charAt(0).toUpperCase()}
+    <div 
+      className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
+      onClick={handleClick}
+    >
+      {/* Header with Avatar and Name */}
+      <div className="flex items-start space-x-3 sm:space-x-4 mb-3 sm:mb-4">
+        {user.avatar ? (
+          <img
+            src={user.avatar}
+            alt={user.name}
+            className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover flex-shrink-0"
+            onError={(e) => {
+              // Fallback to initials if image fails to load
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              const fallback = target.nextElementSibling as HTMLElement
+              if (fallback) {
+                fallback.style.display = 'flex'
+              }
+            }}
+          />
+        ) : null}
+        <div 
+          className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl flex-shrink-0 ${
+            user.avatar ? 'hidden' : ''
+          }`}
+        >
+          {user.name
+            .split(' ')
+            .map(word => word.charAt(0))
+            .join('')
+            .toUpperCase()
+            .slice(0, 2)}
         </div>
-        <div className="flex-1">
-          {isEditing ? (
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={editData.name}
-                onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-3 py-1 border border-gray-300 rounded text-sm"
-                disabled={loading}
-              />
-              <input
-                type="email"
-                value={editData.email}
-                onChange={(e) => setEditData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-3 py-1 border border-gray-300 rounded text-sm"
-                disabled={loading}
-              />
-            </div>
-          ) : (
-            <div>
-              <h3 className="font-semibold text-gray-900">{user.name}</h3>
-              <p className="text-gray-600 text-sm">{user.email}</p>
-            </div>
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+            {user.name}
+          </h3>
+          {user.username && (
+            <p className="text-xs sm:text-sm text-gray-500 truncate">
+              @{user.username}
+            </p>
           )}
+          <p className="text-sm sm:text-base text-gray-600 truncate">
+            {user.headline}
+          </p>
         </div>
       </div>
 
-      <div className="text-xs text-gray-500 mb-4">
-        Created: {new Date(user.createdAt).toLocaleDateString()}
-      </div>
+      {/* Location */}
+      {user.location && user.location !== 'Unknown location' && (
+        <div className="mb-3 sm:mb-4 overflow-hidden">
+          <div className="flex items-center text-gray-500">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="text-xs sm:text-sm truncate">{user.location}</span>
+          </div>
+        </div>
+      )}
 
-      <div className="flex space-x-2">
-        {isEditing ? (
-          <>
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="flex-1 px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
+      {/* Skills */}
+      <div className="flex justify-end overflow-hidden">
+        <div className="flex gap-1 sm:gap-2 max-w-full">
+          {user.skills.slice(0, 2).map((skill, index) => (
+            <span
+              key={index}
+              className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full whitespace-nowrap flex-shrink-0"
+              title={skill} // Show full skill name on hover
             >
-              {loading ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              onClick={handleCancel}
-              disabled={loading}
-              className="flex-1 px-3 py-2 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 disabled:opacity-50"
-            >
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => setIsEditing(true)}
-              disabled={loading}
-              className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => onDelete(user.id)}
-              disabled={loading}
-              className="flex-1 px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
-            >
-              Delete
-            </button>
-          </>
-        )}
+              {skill.length > 15 ? `${skill.slice(0, 15)}...` : skill}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   )

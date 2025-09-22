@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { User } from '@/lib/types/user'
+import { User, CreateUserRequest } from '@/lib/types/user'
 import { UserService } from '@/lib/services/userService'
 
 export const useUserViewModel = () => {
@@ -25,7 +25,7 @@ export const useUserViewModel = () => {
     }
   }
 
-  const createUser = async (userData: { name: string; email: string; password: string }) => {
+  const createUser = async (userData: CreateUserRequest) => {
     setLoading(true)
     setError(null)
     try {

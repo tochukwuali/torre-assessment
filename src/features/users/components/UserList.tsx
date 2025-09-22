@@ -2,6 +2,7 @@
 'use client'
 
 import { useUserViewModel } from '../hooks/useUserViewModel'
+import { CreateUserRequest } from '@/lib/types/user'
 // import { UserCard } from './UserCard'
 // import { CreateUserForm } from './CreateUserForm'
 
@@ -17,7 +18,7 @@ export const UserList = () => {
     hasUsers
   } = useUserViewModel()
 
-  const handleCreateUser = async (userData: { name: string; email: string; password: string }) => {
+  const handleCreateUser = async (userData: CreateUserRequest) => {
     try {
       await createUser(userData)
     } catch (error) {
