@@ -58,7 +58,7 @@ export const SearchResults = ({
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No results found</h3>
         <p className="text-gray-500">
-          No {searchType} found for "{query}". Try different keywords.
+          No {searchType} found for &quot;{query}&quot;. Try different keywords.
         </p>
       </div>
     )
@@ -71,7 +71,7 @@ export const SearchResults = ({
           Search Results ({results.length})
         </h2>
         <p className="text-sm sm:text-base text-gray-600">
-          {searchType} matching "{query}"
+          {searchType} matching &quot;{query}&quot;
         </p>
       </div>
       
